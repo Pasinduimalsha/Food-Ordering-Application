@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@AllArgsConstructor
 public class RestaurantServiceImpl implements RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
