@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @Service
 public class MenuServiceImpl implements MenuService {
 
-
     private final MenuRepository menuRepository;
     private final RestaurantRepository restaurantRepository;
 

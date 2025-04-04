@@ -14,8 +14,6 @@ import java.util.Objects;
 
 @Embeddable
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 @EqualsAndHashCode
 public class MenuId implements Serializable {
 

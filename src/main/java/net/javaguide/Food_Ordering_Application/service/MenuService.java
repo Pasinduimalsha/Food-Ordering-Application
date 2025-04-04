@@ -9,7 +9,6 @@ import java.util.List;
 @Service
 public interface MenuService {
 
-
     MenuDto createMenu(Long restaurantId,MenuDto menuDto);
 
     MenuDto getMenuById(Long menuId);
