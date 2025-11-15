@@ -1,11 +1,16 @@
-FROM openjdk:17
+FROM eclipse-temurin:17
 
 WORKDIR /opt
-ENV PORT 8092
+ #The working directory of the container, when running file this directry will be created in the container
+ENV PORT=8092
 EXPOSE 8092
 
 
 COPY target/*.jar /opt/app.jar
+#copy the local build file into the conatiner /app directry
 
-ENTRYPOINT ["java", "-jar", "/opt/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+#Start the jar file
+
+
 
