@@ -1,103 +1,108 @@
-
-def APP_COMPOSE_IMAGE = "springboot-food-ordering-application:v0.0.1"
-def DB_COMPOSE_IMAGE  = "mysql:8.0"                                
+def DOCKER_HUB_ID = "12345678"
+def DOCKER_REPO = "pasindu12345/springboot-food-ordering-application"
+def SSH_CREDENTIALS_ID = "ec2-ssh-key"
+// def EC2_PUBLIC_IP = "REPLACE_WITH_YOUR_EC2_IP_OR_DNS"
+// def EC2_USER = "ubuntu" // <<< Change to 'ec2-user' if using Amazon Linux
 
 pipeline {
     agent any
 
     environment {
-        REGISTRY_URL        = "docker.io"
-        DOCKER_CREDENTIALS  = "pasindu12345"    
-        DOCKER_IMAGE_APP    = ""               
-        DOCKER_IMAGE_DB     = ""   
+        // Dynamic tags for tracking the build
+        IMAGE_TAG = "${DOCKER_REPO}:${env.BUILD_NUMBER}"
+        IMAGE_LATEST = "${DOCKER_REPO}:latest"
+        APP_NAME = "food-ordering-application"
     }
 
     stages {
-        stage('Compose Build') {
+        stage('Clean Environment & Prepare') {
             steps {
-                echo "Building services with docker-compose..."
-                sh 'docker-compose build --parallel'
+                echo 'Cleaning up local test environment artifacts...'
+                sh 'docker compose down --remove-orphans || true'
+                sh "docker rmi -f ${IMAGE_TAG} || true"
             }
         }
 
-        stage('Integration Test (compose up)') {
+        stage('Build Application Image') {
             steps {
-                echo "Starting services for integration test..."
-                sh 'docker-compose up -d'
-                // basic wait / health checks — adjust as needed
-                sh '''
-                    echo "Waiting for app to start..."
-                    sleep 20
-                '''
+                script {
+                    echo "Building image: ${IMAGE_TAG}"
+                    def app = docker.build(env.IMAGE_TAG, ".")
+                    app.tag(env.IMAGE_LATEST)
+                    env.IMAGE_OBJECT = app
+                }
+            }
+        }
+
+        stage('Run Integration Tests') {
+            steps {
+                echo 'Starting Docker Compose for local testing...'
+                // Uses the freshly built image and pulls the external mysqldb image
+                sh "docker compose up -d --build --force-recreate"
+
+                echo "Waiting for services to stabilize (30 seconds)..."
+                sleep 30
+                // Placeholder for actual testing logic (e.g., cURL health checks)
+                sh 'docker ps'
             }
             post {
                 always {
-                    echo "Stopping compose test environment..."
-                    sh 'docker-compose down'
+                    echo 'Tearing down test environment.'
+                    sh 'docker compose down --remove-orphans'
                 }
             }
         }
 
-        stage('Tag & Push Images') {
+        stage('Push Image to Docker Hub') {
             steps {
                 script {
-                    if (!env.DOCKER_IMAGE_APP) {
-                        error "DOCKER_IMAGE_APP not set. Configure target registry image (e.g. myuser/food-ordering-application)."
-                    }
-
-                    withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS,
-                                                      usernameVariable: 'DOCKER_USER',
-                                                      passwordVariable: 'DOCKER_PASS')]) {
-                        // Login
-                        sh "echo \$DOCKER_PASS | docker login ${env.REGISTRY_URL} --username \$DOCKER_USER --password-stdin"
-
-                        // Tag & push app image built by docker-compose
-                        sh """
-                            echo "Tagging app image ${APP_COMPOSE_IMAGE} -> ${DOCKER_IMAGE_APP}:${env.BUILD_NUMBER}"
-                            docker tag ${APP_COMPOSE_IMAGE} ${DOCKER_IMAGE_APP}:${env.BUILD_NUMBER}
-                            docker tag ${APP_COMPOSE_IMAGE} ${DOCKER_IMAGE_APP}:latest
-
-                            docker push ${DOCKER_IMAGE_APP}:${env.BUILD_NUMBER}
-                            docker push ${DOCKER_IMAGE_APP}:latest
-                        """
-
-                        // Optional: tag & push DB image if configured
-                        if (env.DOCKER_IMAGE_DB?.trim()) {
-                            sh """
-                                echo "Preparing DB image ${DB_COMPOSE_IMAGE} -> ${DOCKER_IMAGE_DB}:${env.BUILD_NUMBER}"
-                                docker pull ${DB_COMPOSE_IMAGE} || true
-                                docker tag ${DB_COMPOSE_IMAGE} ${DOCKER_IMAGE_DB}:${env.BUILD_NUMBER}
-                                docker tag ${DB_COMPOSE_IMAGE} ${DOCKER_IMAGE_DB}:latest
-
-                                docker push ${DOCKER_IMAGE_DB}:${env.BUILD_NUMBER}
-                                docker push ${DOCKER_IMAGE_DB}:latest
-                            """
-                        } else {
-                            echo "DOCKER_IMAGE_DB not provided — skipping DB push."
-                        }
-
-                        // Logout
-                        sh 'docker logout ${REGISTRY_URL}'
+                    echo "Pushing images to Docker Hub: ${DOCKER_REPO}"
+                    // Authenticate and push both tags
+                    docker.withRegistry('https://registry.hub.docker.com', DOCKER_HUB_ID) {
+                        env.IMAGE_OBJECT.push()
                     }
                 }
             }
         }
 
-        stage('Verify Pull (optional)') {
-            steps {
-                script {
-                    echo "Verifying pushed app image by pulling it..."
-                    sh "docker rmi -f ${env.DOCKER_IMAGE_APP}:latest || true"
-                    sh "docker pull ${env.DOCKER_IMAGE_APP}:latest"
-                }
-            }
-        }
+//         stage('Deploy to EC2') {
+//             steps {
+//                 script {
+//                     echo "Deploying to EC2 instance at ${EC2_PUBLIC_IP}"
+//                     // Use sshagent to securely manage the private key for SSH connections
+//                     sshagent(credentials: [SSH_CREDENTIALS_ID]) {
+//
+//                         // 1. Create deployment directory on EC2
+//                         sh """
+//                             ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_PUBLIC_IP} 'mkdir -p /home/${EC2_USER}/${APP_NAME}'
+//                         """
+//
+//                         // 2. Copy docker-compose.yaml from Jenkins workspace to EC2
+//                         // NOTE: Adjust the source path if your docker-compose.yaml is NOT in the root of your Jenkins workspace
+//                         sh """
+//                             scp -o StrictHostKeyChecking=no ./docker-compose.yaml \
+//                             ${EC2_USER}@${EC2_PUBLIC_IP}:/home/${EC2_USER}/${APP_NAME}/docker-compose.yaml
+//                         """
+//
+//                         // 3. Execute remote deployment commands
+//                         sh """
+//                             ssh ${EC2_USER}@${EC2_PUBLIC_IP} '
+//                                 cd /home/${EC2_USER}/${APP_NAME} &&
+//                                 docker compose pull &&
+//                                 docker compose up -d
+//                             '
+//                         """
+//                     }
+//                 }
+//             }
+//         }
     }
 
     post {
         always {
-            echo "Cleanup local temp images"
-            sh "docker rmi -f ${DOCKER_IMAGE_APP}:${env.BUILD_NUMBER} || true"
+            // Clean up the local images regardless of pipeline success
+            sh "docker rmi -f ${DOCKER_REPO}:${env.BUILD_NUMBER} || true"
+            sh "docker rmi -f ${DOCKER_REPO}:latest || true"
         }
     }
 }
