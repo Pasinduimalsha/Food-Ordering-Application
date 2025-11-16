@@ -1,6 +1,6 @@
 def DOCKER_HUB_ID = "12345678"
 def DOCKER_REPO = "pasindu12345/springboot-food-ordering-application"
-def SSH_CREDENTIALS_ID = "ec2-ssh-key"
+// def SSH_CREDENTIALS_ID = "ec2-ssh-key"
 // def EC2_PUBLIC_IP = "REPLACE_WITH_YOUR_EC2_IP_OR_DNS"
 // def EC2_USER = "ubuntu" // <<< Change to 'ec2-user' if using Amazon Linux
 
@@ -18,8 +18,8 @@ pipeline {
         stage('Clean Environment & Prepare') {
             steps {
                 echo 'Cleaning up local test environment artifacts...'
-                sh '/opt/homebrew/bin/docker compose down --remove-orphans || true'
-                sh "/opt/homebrew/bin/docker rmi -f ${IMAGE_TAG} || true"
+                sh 'docker-compose down --remove-orphans || true'
+                sh "docker rmi -f ${IMAGE_TAG} || true"
             }
         }
 
