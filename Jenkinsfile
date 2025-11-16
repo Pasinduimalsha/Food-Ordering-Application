@@ -18,8 +18,8 @@ pipeline {
         stage('Clean Environment & Prepare') {
             steps {
                 echo 'Cleaning up local test environment artifacts...'
-                sh 'docker compose down --remove-orphans || true'
-                sh "docker rmi -f ${IMAGE_TAG} || true"
+                sh '/opt/homebrew/bin/docker compose down --remove-orphans || true'
+                sh "/opt/homebrew/bin/docker rmi -f ${IMAGE_TAG} || true"
             }
         }
 
