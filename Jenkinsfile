@@ -6,8 +6,9 @@ pipeline {
         IMAGE_NAME = "pasindu12345/springboot-food-ordering-application:v0.0.1$BUILD_NUMBER"
     }
 
+
     stages {
-        stage("Build Application Locally") {
+         stage("Build Application Locally") {
             agent { 
                 docker { 
                     image 'maven:3.8.7-jdk-11'
@@ -19,9 +20,6 @@ pipeline {
                 sh "mvn clean package -DskipTests" 
             }
         }
-    }
-
-    stages {
         stage("Build the docker image and push to dockerhub"){
             agent any
             steps {
