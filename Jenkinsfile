@@ -10,6 +10,7 @@ pipeline {
     stages {
          stage("Build Application Locally") {
             agent { 
+                agent any
                 docker { 
                     image 'maven:3.8.7-jdk-11'
                     args '-v $HOME/.m2:/root/.m2' 
