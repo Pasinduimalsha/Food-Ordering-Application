@@ -6,7 +6,6 @@ pipeline {
         IMAGE_NAME = "pasindu12345/springboot-food-ordering-application:v0.0.1$BUILD_NUMBER"
     }
 
-
     stages {
         stage("Build the docker image and push to dockerhub"){
             agent any
@@ -40,7 +39,7 @@ pipeline {
                              echo "Pull the docker image"
                              sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/* ${DEPLOY_SERVER}:/home/ubuntu/"
                              sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'bash ~/docker-script.sh'"
-                             sh "ssh ${BUILD_SERVER} sudo docker login -u $USERNAME -p $PASSWORD"
+                             sh "ssh ${DEPLOY_SERVER} sudo docker login -u $USERNAME -p $PASSWORD"
                              sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'bash ~/docker-compose-script.sh ${IMAGE_NAME}'"
                         }
                     }
