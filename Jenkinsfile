@@ -29,9 +29,7 @@ pipeline {
                     sshagent(['Jenkins-slave']){
                         withCredentials([usernamePassword(credentialsId: '12345678', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]){
                             echo "Packing the code and create a docker image"
-                            sh "scp -o StrictHostKeyChecking=no -r ./docker-script.sh ${BUILD_SERVER}:/home/ubuntu/"
-                            sh "scp -o StrictHostKeyChecking=no -r ./target ${BUILD_SERVER}:/home/ubuntu/"
-                            sh "scp -o StrictHostKeyChecking=no ./Dockerfile ${BUILD_SERVER}:/home/ubuntu/"
+                            sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/* ${BUILD_SERVER}:/home/ubuntu/"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
                             sh "ssh ${BUILD_SERVER} sudo docker build -t ${IMAGE_NAME} /home/ubuntu/"
                             sh "ssh ${BUILD_SERVER} sudo docker login -u $USERNAME -p $PASSWORD"
