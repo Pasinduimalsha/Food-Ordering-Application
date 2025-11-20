@@ -1,8 +1,8 @@
 pipeline {
     agent none
     environment {
-        BUILD_SERVER = 'ubuntu@54.86.125.128'
-        DEPLOY_SERVER = 'ubuntu@54.86.125.128'
+        BUILD_SERVER = 'ubuntu@98.93.74.231'
+        DEPLOY_SERVER = 'ubuntu@54.227.180.79'
         IMAGE_NAME = "pasindu12345/springboot-food-ordering-application:v0.0.1$BUILD_NUMBER"
     }
 
