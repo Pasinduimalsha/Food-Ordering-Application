@@ -9,15 +9,9 @@ pipeline {
 
     stages {
          stage("Build Application Locally") {
-            agent { 
-                agent any
-                docker { 
-                    image 'maven:3.8.7-jdk-11'
-                    args '-v $HOME/.m2:/root/.m2' 
-                } 
-            }
+            agent any // <--- Use 'any' if Maven is installed on your MacBook
             steps {
-                echo "Compiling the Spring Boot application and generating the JAR file in the local 'target/' directory."
+                echo "Compiling the Spring Boot application using host Maven."
                 sh "mvn clean package -DskipTests" 
             }
         }
