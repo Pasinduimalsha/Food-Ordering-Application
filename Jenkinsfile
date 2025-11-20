@@ -21,6 +21,7 @@ pipeline {
         //         sh "mvn clean package -DskipTests" 
         //     }
         // }
+
         stage("Build the docker image and push to dockerhub"){
             agent any
             steps {
@@ -33,7 +34,7 @@ pipeline {
                             sh "scp -o StrictHostKeyChecking=no ./Dockerfile ${BUILD_SERVER}:/home/ubuntu/"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
                             sh "ssh ${BUILD_SERVER} sudo docker build -t ${IMAGE_NAME} /home/ubuntu/"
-                            sh "ssh ${BUILD_SERVER} sudo docker login -u ${USERNAME} p $PASSWORD"
+                            sh "ssh ${BUILD_SERVER} sudo docker login -u ${USERNAME} -p ${PASSWORD}"
                             sh "shh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
                         }
                     }
