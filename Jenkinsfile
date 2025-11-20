@@ -35,7 +35,7 @@ pipeline {
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
                             sh "ssh ${BUILD_SERVER} sudo docker build -t ${IMAGE_NAME} /home/ubuntu/"
                             sh "ssh ${BUILD_SERVER} sudo docker login -u $USERNAME -p $PASSWORD"
-                            sh "shh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
+                            sh "ssh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
                         }
                     }
                 }
