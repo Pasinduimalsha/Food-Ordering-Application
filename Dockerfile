@@ -2,8 +2,8 @@ FROM eclipse-temurin:17
 
 WORKDIR /opt
  #The working directory of the container, when running file this directry will be created in the container
-ENV PORT=8092
-EXPOSE 8092
+ENV PORT=8081
+EXPOSE 8080
 
 
 COPY target/*.jar /opt/app.jar
