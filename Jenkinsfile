@@ -31,6 +31,10 @@ pipeline {
                             echo "Packing the code and create a docker image"
                             sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/* ${BUILD_SERVER}:/home/ubuntu/"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
+
+                            echo "Compiling code and creating JAR file on the BUILD_SERVER"
+                            sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'mvn clean package -DskipTests'"
+
                             sh "ssh ${BUILD_SERVER} sudo docker build -t ${IMAGE_NAME} /home/ubuntu/"
                             sh "ssh ${BUILD_SERVER} sudo docker login -u $USERNAME -p $PASSWORD"
                             sh "ssh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
