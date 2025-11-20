@@ -8,13 +8,19 @@ pipeline {
 
 
     stages {
-         stage("Build Application Locally") {
-            agent any // <--- Use 'any' if Maven is installed on your MacBook
-            steps {
-                echo "Compiling the Spring Boot application using host Maven."
-                sh "mvn clean package -DskipTests" 
-            }
-        }
+        //  stage("Build Application in the remote") {
+        //     agent { 
+        //         agent any
+        //         docker { 
+        //             image 'maven:3.8.7-jdk-11'
+        //             args '-v $HOME/.m2:/root/.m2' 
+        //         } 
+        //     }
+        //     steps {
+        //         echo "Compiling the Spring Boot application and generating the JAR file in the local 'target/' directory."
+        //         sh "mvn clean package -DskipTests" 
+        //     }
+        // }
         stage("Build the docker image and push to dockerhub"){
             agent any
             steps {
