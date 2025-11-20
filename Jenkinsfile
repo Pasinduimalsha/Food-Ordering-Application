@@ -40,7 +40,7 @@ pipeline {
                              echo "Pull the docker image"
                              sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/* ${DEPLOY_SERVER}:/home/ubuntu/"
                              sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'bash ~/docker-script.sh'"
-                             sh "ssh ${BUILD_SERVER} sudo docker login -u $USERNAME p $PASSWORD"
+                             sh "ssh ${BUILD_SERVER} sudo docker login -u $USERNAME -p $PASSWORD"
                              sh "ssh -o StrictHostKeyChecking=no ${DEPLOY_SERVER} 'bash ~/docker-compose-script.sh ${IMAGE_NAME}'"
                         }
                     }
