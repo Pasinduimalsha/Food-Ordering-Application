@@ -31,6 +31,8 @@ pipeline {
                             echo "Packing the code and create a docker image"
                             sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/* ${BUILD_SERVER}:/home/ubuntu/"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
+                            sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'chmod +x mvn-script.sh'"
+                            sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/mvn-script.sh'"
 
                             echo "Compiling code and creating JAR file on the BUILD_SERVER"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'mvn clean package -DskipTests'"
