@@ -16,7 +16,7 @@ pipeline {
                             echo "Packing the code and create a docker image"
                             sh "scp -o StrictHostKeyChecking=no -r ./docker-script.sh ${BUILD_SERVER}:/home/ubuntu/docker-script.sh"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
-                            sh "ssh ${BUILD_SERVER} sudo docker build-t f{IMAGE_NAME} /home/ubuntu/"
+                            sh "ssh ${BUILD_SERVER} sudo docker build -t ${IMAGE_NAME} /home/ubuntu/"
                             sh "ssh ${BUILD_SERVER} sudo docker login -u ${USERNAME} p $PASSWORD"
                             sh "shh ${BUILD_SERVER} sudo docker push ${IMAGE_NAME}"
                         }
