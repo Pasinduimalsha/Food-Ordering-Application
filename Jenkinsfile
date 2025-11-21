@@ -4,8 +4,7 @@ pipeline {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     }
     environment {
-        BUILD_SERVER_IP = ''
-        BUILD_SERVER = "ubuntu@${BUILD_SERVER_IP}"
+        BUILD_SERVER = ""
         DEPLOY_SERVER = 'ubuntu@54.227.180.79'
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
@@ -70,9 +69,8 @@ pipeline {
                             script: 'cd terraform/ ; terraform output -raw build_server_ip',
                             returnStdout: true
                         ).trim()
-                        env.BUILD_SERVER_IP = buildServerIp
-                        echo "Builder IP: ${env.BUILD_SERVER_IP}"
-                    }
+                        echo "Build Server IP: ${buildServerIp}"
+                        env.BUILD_SERVER = "ubuntu@${buildServerIp}"
                 }
             }
         }
