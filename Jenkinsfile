@@ -24,12 +24,7 @@ pipeline {
                 }
         }
         stage('Plan') {
-            agent {
-                docker {
-                    image 'hashicorp/terraform:1.6.0' 
-                    args "-v $HOME/.terraform.d:/root/.terraform.d"
-                }
-            }
+            agent any
             steps {
                 sh 'pwd;cd terraform/ ; terraform init'
                 sh "pwd;cd terraform/ ; terraform plan -out tfplan"
@@ -38,11 +33,11 @@ pipeline {
         }
         stage('Approval') {
             agent any
-           when {
-               not {
-                   equals expected: true, actual: params.autoApprove
-               }
-           }
+            when {
+                not {
+                    equals expected: true, actual: params.autoApprove
+                }
+            }
            steps {
                script {
                     def plan = readFile 'terraform/tfplan.txt'
