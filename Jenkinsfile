@@ -24,6 +24,7 @@ pipeline {
                 }
         }
         stage('Plan') {
+            agent any
             steps {
                 sh 'pwd;cd terraform/ ; terraform init'
                 sh "pwd;cd terraform/ ; terraform plan -out tfplan"
@@ -31,6 +32,7 @@ pipeline {
             }
         }
         stage('Approval') {
+            agent any
            when {
                not {
                    equals expected: true, actual: params.autoApprove
@@ -45,6 +47,7 @@ pipeline {
            }
         }
         stage('Apply') {
+            agent any
             steps {
                 sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
             }
