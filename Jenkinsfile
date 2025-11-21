@@ -4,10 +4,12 @@ pipeline {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     }
     environment {
-        BUILD_SERVER = 'ubuntu@98.93.74.231'
+        BUILD_SERVER_IP = ''
+        BUILD_SERVER = `ubuntu@${BUILD_SERVER_IP}`
         DEPLOY_SERVER = 'ubuntu@54.227.180.79'
-         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        LOCAL_BIN_PATH = "/usr/local/bin:/opt/homebrew/bin"
         IMAGE_NAME = "pasindu12345/springboot-food-ordering-application:v0.0.1$BUILD_NUMBER"
     }
 
@@ -19,6 +21,8 @@ pipeline {
                         dir("terraform")
                         {
                             git "https://github.com/Pasinduimalsha/Food-Ordering-Application.git"
+                            branch: 'master', 
+                            clean: true
                         }
                     }
                 }
@@ -55,6 +59,21 @@ pipeline {
             steps {
                 withEnv(["PATH+LOCAL=/usr/local/bin:/opt/homebrew/bin"]){
                     sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
+                    sh "pwd;cd terraform/ ; terraform output -raw build_server_ip"
+                }
+            }
+        }
+        stage('Get Server IPs') {
+            agent any
+            steps {
+                script {
+                    withEnv(["PATH+LOCAL=${LOCAL_BIN_PATH}"]) {
+                        env.BUILD_SERVER_IP = sh(
+                            script: 'cd terraform/ ; terraform output -raw build_server_ip',
+                            returnStdout: true
+                        ).trim()
+                        echo "Builder IP: ${env.BUILD_SERVER_IP}"
+                    }
                 }
             }
         }
