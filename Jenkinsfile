@@ -24,7 +24,12 @@ pipeline {
                 }
         }
         stage('Plan') {
-            agent any
+            agent {
+                docker {
+                    image 'hashicorp/terraform:1.6.0' 
+                    args "-v $HOME/.terraform.d:/root/.terraform.d"
+                }
+            }
             steps {
                 sh 'pwd;cd terraform/ ; terraform init'
                 sh "pwd;cd terraform/ ; terraform plan -out tfplan"
