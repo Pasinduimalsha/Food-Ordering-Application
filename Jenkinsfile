@@ -20,9 +20,7 @@ pipeline {
                  script{
                         dir("terraform")
                         {
-                            git "https://github.com/Pasinduimalsha/Food-Ordering-Application.git",
-                            branch: 'master', 
-                            clean: true
+                            git "https://github.com/Pasinduimalsha/Food-Ordering-Application.git"
                         }
                     }
                 }
