@@ -66,10 +66,11 @@ pipeline {
             steps {
                 script {
                     withEnv(["PATH+LOCAL=${LOCAL_BIN_PATH}"]) {
-                        env.BUILD_SERVER_IP = sh(
+                        def buildServerIp = sh(
                             script: 'cd terraform/ ; terraform output -raw build_server_ip',
                             returnStdout: true
                         ).trim()
+                        env.BUILD_SERVER_IP = buildServerIp
                         echo "Builder IP: ${env.BUILD_SERVER_IP}"
                     }
                 }
