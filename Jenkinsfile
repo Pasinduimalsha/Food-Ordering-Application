@@ -26,9 +26,13 @@ pipeline {
         stage('Plan') {
             agent any
             steps {
-                sh 'pwd;cd terraform/ ; terraform init'
-                sh "pwd;cd terraform/ ; terraform plan -out tfplan"
-                sh 'pwd;cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
+                script {
+                    docker.image('hashicorp/terraform:1.5.7').inside {
+                        sh 'cd terraform && terraform init -input=false'
+                        sh 'cd terraform && terraform plan -out=tfplan'
+                        sh 'cd terraform && terraform show -no-color tfplan > tfplan.txt'
+                    }
+                }
             }
         }
         stage('Approval') {
