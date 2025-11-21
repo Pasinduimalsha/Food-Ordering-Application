@@ -71,6 +71,7 @@ pipeline {
                         ).trim()
                         echo "Build Server IP: ${buildServerIp}"
                         env.BUILD_SERVER = "ubuntu@${buildServerIp}"
+                    }
                 }
             }
         }
