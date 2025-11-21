@@ -42,16 +42,20 @@ pipeline {
             }
            steps {
                script {
+                    withEnv(["PATH+LOCAL=/usr/local/bin:/opt/homebrew/bin"]){
                     def plan = readFile 'terraform/tfplan.txt'
                     input message: "Do you want to apply the plan?",
                     parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                    }
                }
            }
         }
         stage('Apply') {
             agent any
             steps {
-                sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
+                withEnv(["PATH+LOCAL=/usr/local/bin:/opt/homebrew/bin"]){
+                    sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
+                }
             }
         }
         stage("Build the docker image and push to dockerhub"){
