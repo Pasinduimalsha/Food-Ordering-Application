@@ -4,9 +4,9 @@ pipeline {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     }
     environment {
-        BUILD_SERVER = ""
+        BUILD_SERVER = ''
         DEPLOY_SERVER = 'ubuntu@54.227.180.79'
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         LOCAL_BIN_PATH = "/usr/local/bin:/opt/homebrew/bin"
         IMAGE_NAME = "pasindu12345/springboot-food-ordering-application:v0.0.1$BUILD_NUMBER"
@@ -71,6 +71,7 @@ pipeline {
                         ).trim()
                         echo "Build Server IP: ${buildServerIp}"
                         env.BUILD_SERVER = "ubuntu@${buildServerIp}"
+                        echo "Build Server SSH: ${env.BUILD_SERVER}"
                     }
                 }
             }
