@@ -4,7 +4,7 @@ pipeline {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     }
     environment {
-        BUILD_SERVER = ''
+//         BUILD_SERVER = ''
         DEPLOY_SERVER = 'ubuntu@54.227.180.79'
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
@@ -70,8 +70,12 @@ pipeline {
                             returnStdout: true
                         ).trim()
                         echo "Build Server IP: ${buildServerIp}"
-                        env.BUILD_SERVER = "ubuntu@${buildServerIp}" 
-                        echo "Build Server SSH: ${env.BUILD_SERVER}"
+                        def buildServerConn = "ubuntu@${buildServerIp}"
+                        echo "Build Server SSH Connection String: ${buildServerConn}"
+
+                       writeFile file: 'build_server_conn.txt', text: buildServerConn
+                       stash name: 'build_conn_data', includes: 'build_server_conn.txt'
+
                     }
                 }
             }
@@ -80,8 +84,12 @@ pipeline {
             agent any
             steps {
                 script {
+                     unstash 'build_conn_data'
+                     def BUILD_SERVER = readFile('build_server_conn.txt').trim()
+
                     sshagent(['Jenkins-slave']){
                         withCredentials([usernamePassword(credentialsId: '12345678', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]){
+                            echo "Connecting to Build Server: ${BUILD_SERVER}"
                             echo "Packing the code and create a docker image"
                             sh "scp -o StrictHostKeyChecking=no -r ${WORKSPACE}/* ${BUILD_SERVER}:/home/ubuntu/"
                             sh "ssh -o StrictHostKeyChecking=no ${BUILD_SERVER} 'bash ~/docker-script.sh'"
