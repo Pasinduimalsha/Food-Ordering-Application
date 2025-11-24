@@ -34,6 +34,7 @@ resource "aws_instance" "build_server" {
   subnet_id = data.aws_subnet.default.id
   vpc_security_group_ids = [aws_security_group.build_server_sg.id]
   instance_type = var.instance_type
+  key_name = var.key_name
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
