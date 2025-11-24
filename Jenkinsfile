@@ -71,20 +71,18 @@ pipeline {
                         def buildServerConn = "ubuntu@${buildServerIp}"
                         echo "Build Server SSH Connection String: ${buildServerConn}"
 
-                       writeFile file: 'build_server_conn.txt', text: buildServerConn
-                       stash name: 'build_conn_data', includes: 'build_server_conn.txt'
+                        writeFile file: 'build_server_conn.txt', text: buildServerConn
+                        stash name: 'build_conn_data', includes: 'build_server_conn.txt'
 
-                           // also get deploy server IP and stash
-                           def deployServerIp = sh(
-                                script: 'cd terraform/ ; terraform output -raw deploy_server_ip',
-                                returnStdout: true
-                           ).trim()
-                           echo "Deploy Server IP: ${deployServerIp}"
-                           def deployServerConn = "ubuntu@${deployServerIp}"
-                           writeFile file: 'deploy_server_conn.txt', text: deployServerConn
-                           stash name: 'deploy_conn_data', includes: 'deploy_server_conn.txt'
-
-                        }
+                        def deployServerIp = sh(
+                            script: 'cd terraform/ ; terraform output -raw deploy_server_ip',
+                            returnStdout: true
+                        ).trim()
+                        echo "Deploy Server IP: ${deployServerIp}"
+                        def deployServerConn = "ubuntu@${deployServerIp}"
+                        writeFile file: 'deploy_server_conn.txt', text: deployServerConn
+                        stash name: 'deploy_conn_data', includes: 'deploy_server_conn.txt'
+                    }
                 }
             }
         }

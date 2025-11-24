@@ -35,13 +35,6 @@ resource "aws_instance" "build_server" {
   vpc_security_group_ids = [aws_security_group.build_server_sg.id]
   instance_type = var.instance_type
   key_name = var.key_name
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              yum install -y httpd
-              systemctl start httpd
-              systemctl enable httpd
-              EOF
   tags = {
     Name = "Build Server"
   }
@@ -84,13 +77,6 @@ resource "aws_instance" "deploy_server" {
   vpc_security_group_ids = [aws_security_group.deploy_server_sg.id]
   instance_type = var.instance_type
   key_name = var.key_name
-  user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              yum install -y docker
-              systemctl start docker
-              systemctl enable docker
-              EOF
   tags = {
     Name = "Deploy Server"
   }
