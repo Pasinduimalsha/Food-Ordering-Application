@@ -4,7 +4,6 @@ pipeline {
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
     }
     environment {
-        DEPLOY_SERVER = 'ubuntu@54.227.180.79'
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         LOCAL_BIN_PATH = "/usr/local/bin:/opt/homebrew/bin"
@@ -75,7 +74,17 @@ pipeline {
                        writeFile file: 'build_server_conn.txt', text: buildServerConn
                        stash name: 'build_conn_data', includes: 'build_server_conn.txt'
 
-                    }
+                           // also get deploy server IP and stash
+                           def deployServerIp = sh(
+                                script: 'cd terraform/ ; terraform output -raw deploy_server_ip',
+                                returnStdout: true
+                           ).trim()
+                           echo "Deploy Server IP: ${deployServerIp}"
+                           def deployServerConn = "ubuntu@${deployServerIp}"
+                           writeFile file: 'deploy_server_conn.txt', text: deployServerConn
+                           stash name: 'deploy_conn_data', includes: 'deploy_server_conn.txt'
+
+                        }
                 }
             }
         }
@@ -110,6 +119,9 @@ pipeline {
             agent any
             steps{
                 script{
+                     unstash 'deploy_conn_data'
+                     def DEPLOY_SERVER = readFile('deploy_server_conn.txt').trim()
+
                     sshagent(['Jenkins-slave']){
                         withCredentials([usernamePassword(credentialsId: '12345678', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]){
                              echo "Pull the docker image"
